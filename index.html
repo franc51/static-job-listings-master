@@ -14,6 +14,23 @@
     <script src="index.js" defer></script>
   </head>
   <body>
+    <div class="filter_container">
+      <div class="filter_by">
+        <div class="filter_style">
+          <p>Frontend</p>
+          <button id="filter_frontend" class="filter_style_btn"></button>
+        </div>
+        <div class="filter_style">
+          <p>CSS</p>
+          <button id="filter_css" class="filter_style_btn"></button>
+        </div>
+        <div class="filter_style">
+          <p>JavaScript</p>
+          <button id="filter_js" class="filter_style_btn"></button>
+        </div>
+      </div>
+      <button class="clear_filters">Clear</button>
+    </div>
     <div id="loading">Loading jobs...</div>
     <div id="job-listings"></div>
   </body>
