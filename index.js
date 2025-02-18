@@ -1,15 +1,15 @@
-let jobListings = []; // Store fetched job data globally
+let jobListings = [];
 
 let filter_frontend = document.getElementById("filter_frontend");
 let filter_css = document.getElementById("filter_css");
 let filter_js = document.getElementById("filter_js");
+let clear_filters = document.getElementById("clear_filters");
 
 document.addEventListener("DOMContentLoaded", async () => {
   const jobContainer = document.getElementById("job-listings");
   const loadingIndicator = document.getElementById("loading");
 
   try {
-    // Show loading text and hide job listings
     loadingIndicator.style.display = "block";
     jobContainer.style.display = "none";
 
@@ -21,58 +21,78 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error loading jobs:", error);
     jobContainer.innerHTML = `<p class="error-message">Error loading jobs. Please try again later.</p>`;
   } finally {
-    // Hide loading text and show job listings
     loadingIndicator.style.display = "none";
     jobContainer.style.display = "block";
   }
 });
 
-// Function to display jobs
 function displayJobs(jobs) {
   const jobContainer = document.getElementById("job-listings");
-  jobContainer.innerHTML = ""; // Clear previous content
 
-  if (jobs.length === 0) {
-    jobContainer.innerHTML = `<p class="no-results">No jobs found.</p>`;
-    return;
-  }
+  const jobCards = document.querySelectorAll(".job-card");
+  jobCards.forEach((card) => card.classList.add("hide"));
 
-  jobs.forEach((job) => {
-    const jobCard = document.createElement("div");
-    jobCard.classList.add("job-card");
+  setTimeout(() => {
+    jobContainer.innerHTML = ""; // Clear previous content
 
-    jobCard.innerHTML = `
-      <img src="${job.logo}" alt="${job.company}">
-      <div class="job-details">
-          <p class="job-company">${job.company}</p>
-          <h2>${job.position}</h2>
+    if (jobs.length === 0) {
+      jobContainer.innerHTML = `<p class="no-results">No jobs found.</p>`;
+      return;
+    }
 
-          <div class="job-time">
-              <p class="job-postedAt">${job.postedAt}</p>
-              <ul>
-                  <li>${job.contract}</li>
-                  <li>${job.location}</li>
-              </ul>
-          </div>
-      </div>
-      <div class="tags">
-          ${[job.role, job.level, ...job.languages, ...job.tools]
-            .map((tag) => `<span class="tag">${tag}</span>`)
-            .join("")}
-      </div>
-    `;
+    jobs.forEach((job) => {
+      const jobCard = document.createElement("div");
+      jobCard.classList.add("job-card", "hide");
 
-    jobContainer.appendChild(jobCard);
-  });
+      jobCard.innerHTML = `
+        <img src="${job.logo}" alt="${job.company}">
+        <div class="job-details">
+            <div class="job-title-new">
+            <p class="job-company">${job.company}</p>
+            ${job.new ? `<p class="new">NEW!</p>` : ""}
+            ${job.featured ? `<p class="featured">FEATURED</p>` : ""}
+            </div>
+            <h2>${job.position}</h2>
+
+            <div class="job-time">
+                <p class="job-postedAt">${job.postedAt}</p>
+                <ul>
+                    <li>${job.contract}</li>
+                    <li>${job.location}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="tags">
+            ${[job.role, job.level, ...job.languages, ...job.tools]
+              .map((tag) => `<span class="tag">${tag}</span>`)
+              .join("")}
+        </div>
+      `;
+
+      jobContainer.appendChild(jobCard);
+    });
+    setTimeout(() => {
+      document
+        .querySelectorAll(".job-card")
+        .forEach((card) => card.classList.remove("hide"));
+    }, 50);
+  }, 100);
 }
 
-function filterJobs(languages) {
-  const filteredJobs = jobListings.filter((job) =>
-    job.languages.includes(languages)
-  );
+function filterJobs(languages = null, role = null) {
+  const filteredJobs = jobListings.filter((job) => {
+    const matchesLanguage = languages
+      ? job.languages.includes(languages)
+      : true;
+    const matchesRole = role ? job.role.includes(role) : true;
+    return matchesLanguage && matchesRole;
+  });
+
   displayJobs(filteredJobs);
 }
+filter_frontend.addEventListener("click", () => filterJobs(null, "Frontend"));
+filter_css.addEventListener("click", () => filterJobs("CSS", null));
+filter_js.addEventListener("click", () => filterJobs("JavaScript", null));
 
-filter_frontend.addEventListener("click", () => filterJobs("Frontend"));
-filter_css.addEventListener("click", () => filterJobs("CSS"));
-filter_js.addEventListener("click", () => filterJobs("JavaScript"));
+// Clear filters (Show all jobs)
+clear_filters.addEventListener("click", () => displayJobs(jobListings));
